@@ -1,0 +1,22 @@
+[package]
+name = "kv_server"
+version = "0.1.0"
+
+
+[lib]
+name = "kvprotos"
+path = "src/kvprotos/mod.rs"
+
+[[bin]]
+name = "client"
+path = "src/client.rs"
+
+[[bin]]
+name = "server"
+path = "src/server.rs"
+
+
+[dependencies]
+futures = "0.1.16"
+grpcio = "0.3.0"
+protobuf = "2.0.2"
