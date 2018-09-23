@@ -6,9 +6,9 @@ use std::io::Read;
 use std::sync::Arc;
 use std::{io, thread};
 
-use futures::sync::oneshot;
+use futures::sync::oneshot::{self, Receiver, Sender};
 use futures::Future;
-use grpcio::{Environment, RpcContext, ServerBuilder, UnarySink};
+use grpcio::{Environment, RpcContext, ServerBuilder, UnarySink, Server as GrpcServer};
 
 use kvprotos::src::kvpb::{GetRequest, GetResponse, PutRequest, PutResponse, DeleteRequest, DeleteResponse};
 use kvprotos::src::kvpb_grpc::{self, Kv};
@@ -16,7 +16,7 @@ use storage::Storage;
 use storage::engine::sample_engine::SampleEngine;
 
 use storage::engine::Engine;
-
+use std::sync::Mutex;
 //
 //struct MemoryDB{
 //
@@ -61,7 +61,7 @@ impl Kv for KvService {
                 Some(key) => response.set_value(key),
                 None => (),
             }
-           Err(_)=> response.set_error(String::from("errors")),
+            Err(_) => response.set_error(String::from("errors")),
         }
 
         let f = sink.success(response.clone())
@@ -78,7 +78,7 @@ impl Kv for KvService {
 
         match ret {
             Ok(_) => (),
-           Err(_)=> response.set_error(String::from("errors")),
+            Err(_) => response.set_error(String::from("errors")),
         }
 
         let f = sink.success(response.clone())
@@ -94,7 +94,7 @@ impl Kv for KvService {
         let ret = engine.delete(req.key);
         match ret {
             Ok(_) => (),
-           Err(_)=> response.set_error(String::from("errors")),
+            Err(_) => response.set_error(String::from("errors")),
         }
         let f = sink.success(response.clone())
             .map(move |_| println!("Responded with  {{ {:?} }}", response))
@@ -105,48 +105,62 @@ impl Kv for KvService {
 
 
 pub struct KvServer {
-    host: String,
-    port: u16,
+    grpc_server: GrpcServer,
+    //    chan:Arc<Mutex<(Sender<()>, Receiver<()>)>>
+//    chan: (Sender<()>, Receiver<()>),
+//
+//    rev: Option<&'a Receiver<()>>,
+//
+//    sender: Option<&'a  Sender<()>>,
 }
 
 impl KvServer {
     pub fn new(host: String, port: u16) -> Self {
+        let env = Arc::new(Environment::new(1));
+        let service = kvpb_grpc::create_kv(KvService::new());
+        let grpc_server = ServerBuilder::new(env)
+            .register_service(service)
+            .bind(host.as_ref(), port.clone()).build().unwrap();
+
+
         KvServer {
-            host,
-            port,
+            grpc_server,
+//            chan:Arc::new(Mutex::new(oneshot::channel()))
+//            chan: oneshot::channel(),
+//            rev: None,
+//            sender:None
         }
     }
 
-    pub fn start(&self) {
-        let env = Arc::new(Environment::new(1));
-        let service = kvpb_grpc::create_kv(KvService::new());
-        let mut server = ServerBuilder::new(env)
-            .register_service(service)
-            .bind(self.host.as_ref(), self.port.clone())
-            .build()
-            .unwrap();
+    pub fn start(&mut self) {
+        self.grpc_server.start();
 
-        server.start();
-
-        for &(ref host, port) in server.bind_addrs() {
+        for &(ref host, port) in self.grpc_server.bind_addrs() {
             println!("listening on {}:{}", host, port);
         }
-        let (tx, rx) = oneshot::channel();
-        thread::spawn(move || {
-            println!("Press ENTER to exit...");
+//        let (tx, rx) = oneshot::channel();
+//        thread::spawn(move || {
+//            println!("Press ENTER to exit...");
 //            let _ = io::stdin().read(&mut [0]).unwrap();
 //            tx.send(())
-        });
-        let _ = rx.wait();
-        let _ = server.shutdown().wait();
+//        });
+//        let _ = rx.wait();
+//        let _ = self.grpc_server.shutdown().wait();
+    }
+
+    pub fn stop(&mut self) {
+//        self.sender.unwrap().send(());
+        println!("stoping server...");
+        self.grpc_server.shutdown();
     }
 }
 
 
 #[test]
 fn server_start_test() {
-    let host ="127.0.0.1";
+    let host = "127.0.0.1";
     let port = 0;
-    let server = KvServer::new(host.into(),port);
+    let mut server = KvServer::new(host.into(), port);
     server.start();
+    server.stop();
 }

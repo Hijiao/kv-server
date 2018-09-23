@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use grpcio::{ChannelBuilder, EnvBuilder};
 
-use kvprotos::src::kvpb::{GetRequest,  PutRequest, DeleteRequest};
+use kvprotos::src::kvpb::{GetRequest, PutRequest, DeleteRequest};
 use kvprotos::src::kvpb_grpc::KvClient;
 use storage::{Key, Value};
 use server::KvServer;
@@ -15,9 +15,8 @@ struct Client {
 }
 
 impl Client {
-    pub fn new(host: String,port: u16,) -> Self {
-
-        let addr = format!("{}:{}",host, port);
+    pub fn new(host: String, port: u16) -> Self {
+        let addr = format!("{}:{}", host, port);
         let env = Arc::new(EnvBuilder::new().build());
         let ch = ChannelBuilder::new(env).connect(addr.as_ref());
         let kv_client = KvClient::new(ch);
@@ -37,7 +36,7 @@ impl Client {
         let mut put_req = PutRequest::new();
         put_req.set_key(k);
         put_req.set_value(v);
-         self.client.put(&put_req).expect("RPC failed");
+        self.client.put(&put_req).expect("RPC failed");
     }
 
     pub fn delete(&self, k: Key) {
@@ -56,25 +55,26 @@ fn client_test() {
     let test_host = String::from("127.0.0.1");
     let test_port = 18811;
 
-    let client = Client::new(test_host.clone(),test_port);
-    let test_server = KvServer::new(test_host.clone(),test_port);
+    let client = Client::new(test_host.clone(), test_port);
+    let mut test_server = KvServer::new(test_host.clone(), test_port);
 
     test_server.start();
     client.delete(test_key.clone());
 
     let v = client.get(test_key.clone());
-    println!("before put(delete first) v:{:?}", v);
-    assert_eq!(String::from_utf8(test_value.clone()).unwrap(),"");
+//    println!("before put(delete first) v:{:?}", v);
+    assert_eq!("", v);
 
-    client.put(test_key.clone(), test_key.clone());
+    client.put(test_key.clone(), test_value.clone());
 
     let v = client.get(test_key.clone());
-    println!("after put v:{:?}", v);
-    assert_eq!(String::from_utf8(test_value.clone()).unwrap(),v);
+//    println!("after put v:{:?}", v);
+    assert_eq!(String::from_utf8(test_value.clone()).unwrap(), v);
 
     client.delete(test_key.clone());
     let v = client.get(test_key.clone());
-    println!("after delete v:{:?}", v);
-    assert_eq!(String::from_utf8(test_value.clone()).unwrap(),"");
+//    println!("after delete v:{:?}", v);
+    assert_eq!("", v);
 
+    test_server.stop();
 }
