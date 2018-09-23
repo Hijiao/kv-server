@@ -4,12 +4,17 @@ version = "0.1.0"
 
 
 [lib]
-name = "kvprotos"
-path = "src/kvprotos/mod.rs"
+name = "kvlib"
+path = "src/lib.rs"
 
 [[bin]]
 name = "client"
 path = "src/client.rs"
+
+
+[[bin]]
+name = "test"
+path = "src/test.rs"
 
 [[bin]]
 name = "server"

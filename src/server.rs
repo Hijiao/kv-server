@@ -1,6 +1,9 @@
-extern crate futures;
+
+extern crate kvlib;
+extern crate protobuf;
 extern crate grpcio;
-extern crate kvprotos;
+extern crate futures;
+
 
 use std::io::Read;
 use std::sync::Arc;
@@ -10,8 +13,38 @@ use futures::sync::oneshot;
 use futures::Future;
 use grpcio::{Environment, RpcContext, ServerBuilder, UnarySink};
 
-use kvprotos::src::kvpb::{ GetRequest, GetResponse, PutRequest, PutResponse, DeleteRequest, DeleteResponse};
-use kvprotos::src::kvpb_grpc::{self, Kv};
+use kvlib::kvprotos::src::kvpb::{ GetRequest, GetResponse, PutRequest, PutResponse, DeleteRequest, DeleteResponse};
+use kvlib::kvprotos::src::kvpb_grpc::{self, Kv};
+
+
+type Value = Vec<u8>;
+
+type Key = Vec<u8>;
+
+
+//
+//struct MemoryDB{
+//
+//}
+//
+//impl Engine for MemoryDB{
+//    fn get(&self, key: &Key) -> Result<Option<Value>>{
+//        unimplemented!()
+//    }
+//
+//    fn put(&self,  key: Key, value: Value) -> Result<()> {
+//        unimplemented!()
+//    }
+//
+//    fn delete(&self,key:Key)->Result<()>{
+//        unimplemented!()
+//    }
+//}
+
+
+
+
+
 
 #[derive(Clone)]
 struct KvService;
@@ -40,7 +73,9 @@ fn main() {
         .bind("127.0.0.1", 18881)
         .build()
         .unwrap();
+
     server.start();
+
     for &(ref host, port) in server.bind_addrs() {
         println!("listening on {}:{}", host, port);
     }
