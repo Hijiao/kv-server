@@ -1,15 +1,11 @@
 use std::collections::BTreeMap;
 use std::collections::btree_map::Range;
-use std::str;
+use super::{Key, Value};
 
 pub struct DataPool {
     pub btree: BTreeMap<String, String>,
 }
 
-
-type Value = Vec<u8>;
-
-type Key = Vec<u8>;
 
 impl DataPool {
     pub fn new() -> Self {
@@ -17,21 +13,27 @@ impl DataPool {
             btree: BTreeMap::new()
         }
     }
-    pub fn insert(&mut self, k: Vec<u8>, v: Value) -> Option<String> {
+    pub fn insert(&mut self, k: Key, v: Value) -> Option<String> {
         unsafe {
             self.btree.insert(String::from_utf8_unchecked(k), String::from_utf8_unchecked(v))
         }
     }
 
-    pub fn get(&self, k: Vec<u8>) -> Option<&String> {
-        unsafe { self.btree.get(&String::from_utf8_unchecked(k)) }
+    pub fn get(&self, k: Key) -> Option<String> {
+        unsafe {
+            let ret = self.btree.get(&String::from_utf8_unchecked(k));
+            match ret {
+                Some(s) => Some(s.to_owned()),
+                None => None
+            }
+        }
     }
 
-    pub fn find(&self, k: Vec<u8>) -> Range<String, String> {
+    pub fn find(&self, k: Key) -> Range<String, String> {
         unsafe { self.btree.range(String::from_utf8_unchecked(k)..) }
     }
 
-    pub fn delete(&mut self, k: Vec<u8>) {
+    pub fn delete(&mut self, k: Key) {
         unsafe { self.btree.remove(&String::from_utf8_unchecked(k)) };
     }
 
@@ -87,6 +89,9 @@ fn data_pool_string_test() {
 
 
 //    da.show_all();
+
+    let s = String::from("abc");
+    s.into_bytes();
 
     assert_eq!(da.btree.len(), 3);
 

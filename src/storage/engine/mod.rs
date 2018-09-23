@@ -1,9 +1,9 @@
 use std::result;
 
-pub mod sampledb;
+pub mod sample_engine;
 pub mod data_pool;
 
-type Result<T> = result::Result<T, ResultError>;
+pub type Result<T> = result::Result<T, ResultError>;
 
 
 pub enum ResultError {
@@ -15,8 +15,8 @@ pub type Value = Vec<u8>;
 
 pub trait Engine {
     //    fn get(&self,key:Key)->Result<Option<Value>>;
-     fn get(&self, key: &Key) -> Result<Option<Value>>;
-     fn put(&self, key: Key, value: Value) -> Result<()>;
-     fn delete(&self, key: Key) -> Result<()>;
+     fn get(&self, key: Key) -> Result<Option<Value>>;
+     fn put(&mut self, key: Key, value: Value) -> Result<()>;
+     fn delete(&mut self, key: Key) -> Result<()>;
 }
 
