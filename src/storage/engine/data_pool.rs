@@ -2,8 +2,10 @@ use std::collections::BTreeMap;
 use std::collections::btree_map::Range;
 use super::{Key, Value};
 
+
+//#[derive(Clone)]
 pub struct DataPool {
-    pub btree: BTreeMap<String, String>,
+    btree: BTreeMap<String, String>,
 }
 
 
@@ -88,15 +90,19 @@ fn data_pool_string_test() {
     da.insert(b"key_c".to_vec(), b"value_c".to_vec());
 
 
-//    da.show_all();
-
-    let s = String::from("abc");
-    s.into_bytes();
-
     assert_eq!(da.btree.len(), 3);
 
-    da.delete(b"key_b".to_vec());
+    let search_key = b"key_b".to_vec();
+
+    let r = da.get(search_key.clone()).unwrap();
+    assert_eq!("value_b", r);
+
+    da.delete(search_key.clone());
     assert_eq!(da.btree.len(), 2);
+
+    let r = da.get(search_key.clone());
+    assert_eq!(None, r);
+    println!("search result:{:?}", r);
 
 
 //    let v = b"v".to_vec();
