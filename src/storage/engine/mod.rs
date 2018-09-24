@@ -14,17 +14,17 @@ pub enum ResultError {
 //    Overflow(),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Task {
-    Delete(Key),
     Put(Key, Value),
+    Delete(Key),
 }
 
 impl Display for Task {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match *self {
-            Task::Delete(..) => write!(f, "delete task"),
-            Task::Put(..) => write!(f, "put  task"),
+            Task::Put(ref k, ref v) => write!(f, "put -> {:?} : {:?}", String::from_utf8(k.clone()).unwrap(), String::from_utf8(v.clone()).unwrap()),
+            Task::Delete(ref k) => write!(f, "delete -> {:?}", String::from_utf8(k.clone()).unwrap())
         }
     }
 }

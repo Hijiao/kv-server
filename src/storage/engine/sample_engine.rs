@@ -8,7 +8,7 @@ use super::data_writer::{WriteQueue, DataWriter};
 #[derive(Clone)]
 pub struct SampleEngine {
     data_pool: Arc<RwLock<DataPool>>,
-    write_queue: WriteQueue<Task>,
+    write_queue: WriteQueue,
 }
 
 impl SampleEngine {
@@ -22,6 +22,7 @@ impl SampleEngine {
         }
     }
     pub fn shutdown(&self) {
+        println!("sample engine shutdown ...");
         self.write_queue.append(None);
     }
 }
@@ -29,18 +30,19 @@ impl SampleEngine {
 impl Engine for SampleEngine {
     fn get(&self, key: Key) -> Result<Option<Value>> {
         let ret = self.data_pool.read().unwrap().get(key);
-
         match ret {
             Some(s) => Ok(Some(s.into_bytes())),
             None => Ok(None)
         }
     }
     fn put(&self, key: Key, value: Value) -> Result<()> {
+        self.write_queue.append(Some(Task::Put(key.clone(), value.clone())));
         let mut data_pool = self.data_pool.write().unwrap();
         data_pool.insert(key, value);
         Ok(())
     }
     fn delete(&self, key: Key) -> Result<()> {
+        self.write_queue.append(Some(Task::Delete(key.clone())));
         let mut data_pool = self.data_pool.write().unwrap();
         data_pool.delete(key);
         Ok(())
