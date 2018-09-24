@@ -2,11 +2,8 @@ extern crate protobuf;
 extern crate grpcio;
 extern crate futures;
 
-use std::io::Read;
 use std::sync::Arc;
-use std::{io, thread};
 
-use futures::sync::oneshot::{self, Receiver, Sender};
 use futures::Future;
 use grpcio::{Environment, RpcContext, ServerBuilder, UnarySink, Server as GrpcServer};
 
@@ -16,8 +13,6 @@ use storage::Storage;
 use storage::engine::sample_engine::SampleEngine;
 
 use storage::engine::Engine;
-use std::sync::Mutex;
-use std::thread::JoinHandle;
 //
 //struct MemoryDB{
 //

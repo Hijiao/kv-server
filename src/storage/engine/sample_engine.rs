@@ -14,7 +14,7 @@ pub struct SampleEngine {
 impl SampleEngine {
     pub fn new() -> SampleEngine {
         let mut data_write = DataWriter::new();
-        data_write.start();
+        data_write.start().ok();
 
         SampleEngine {
             data_pool: Arc::new(RwLock::new(DataPool::new())),
@@ -52,7 +52,6 @@ impl Engine for SampleEngine {
 #[test]
 fn engine_test() {
     use std::thread;
-    use std::io::Read;
     use std::time::Duration;
 
     let engine = SampleEngine::new();

@@ -5,7 +5,6 @@ use std::sync::Mutex;
 use std::thread::JoinHandle;
 use std::{io, usize};
 use std::thread;
-use std::fmt::Display;
 use super::Task;
 use std::fs::OpenOptions;
 use std::fs::File;
@@ -54,20 +53,17 @@ pub struct DataWriter {
     receiver: Mutex<Option<Receiver<Option<Task>>>>,
     handle: Option<JoinHandle<()>>,
     batch_size: usize,
-    pending_size: usize,
 }
 
 impl DataWriter {
     pub fn new() -> DataWriter {
         let batch_size = DEFAULT_WRITE_BATCH_SIZE;
-        let pending_size = DEFAULT_WRITE_PENDING_SIZE;
-        let (tx, rx) = crossbeam_channel::bounded(pending_size);
+        let (tx, rx) = crossbeam_channel::bounded(DEFAULT_WRITE_PENDING_SIZE);
         DataWriter {
             queue: WriteQueue::new(tx),
             receiver: Mutex::new(Some(rx)),
             handle: None,
             batch_size,
-            pending_size,
         }
     }
 
@@ -116,20 +112,20 @@ fn write_batch(batch: &mut Vec<Task>, file: &mut File) {
     for t in batch.drain(..) {
         match t {
             Task::Put(k, v) => {
-                file.write(&FILE_PUT_MARK);
-                file.write(&k);
-                file.write(&FILE_SPLIT_MARK);
-                file.write(&v);
-                file.write(&FILE_SPLIT_MARK);
+                file.write(&FILE_PUT_MARK).ok();
+                file.write(&k).ok();
+                file.write(&FILE_SPLIT_MARK).ok();
+                file.write(&v).ok();
+                file.write(&FILE_SPLIT_MARK).ok();
             }
             Task::Delete(k) => {
-                file.write(&FILE_DELETE_MARK);
-                file.write(&k);
-                file.write(&FILE_SPLIT_MARK);
+                file.write(&FILE_DELETE_MARK).ok();
+                file.write(&k).ok();
+                file.write(&FILE_SPLIT_MARK).ok();
             }
         }
     }
-    file.sync_data();//? file.flush();
+    file.sync_data().ok();//? file.flush();
 }
 
 
@@ -161,11 +157,10 @@ fn fill_task_batch(rx: &Receiver<Option<Task>>, buffer: &mut Vec<Task>, batch_si
 
 #[test]
 fn data_write_test() {
-    use std::io::Read;
     use std::time::Duration;
     let mut writer: DataWriter = DataWriter::new();
 
-    writer.start();
+    writer.start().ok();
 
     let p = Task::Put(b"kk".to_vec(), b"vv".to_vec());
     let d = Task::Delete(b"del-ket".to_vec());
@@ -193,8 +188,8 @@ fn write_batch_test() {
     let mut nv: Vec<Task> = Vec::new();
 
     {
-        let mut f = File::open("foo.txt").unwrap();
-        let mut file = BufReader::new(&f);
+        let f = File::open("foo.txt").unwrap();
+        let file = BufReader::new(&f);
         let mut it = file.lines();
 
 
