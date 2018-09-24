@@ -62,19 +62,27 @@ fn client_test() {
     client.delete(test_key.clone());
 
     let v = client.get(test_key.clone());
-//    println!("before put(delete first) v:{:?}", v);
     assert_eq!("", v);
 
     client.put(test_key.clone(), test_value.clone());
-
     let v = client.get(test_key.clone());
-//    println!("after put v:{:?}", v);
     assert_eq!(String::from_utf8(test_value.clone()).unwrap(), v);
 
     client.delete(test_key.clone());
     let v = client.get(test_key.clone());
-//    println!("after delete v:{:?}", v);
     assert_eq!("", v);
+
+    let test_key = "你好".to_string().into_bytes();
+    let test_value = "世界".to_string().into_bytes();
+    client.put(test_key.clone(), test_value.clone());
+    let v = client.get(test_key.clone());
+    assert_eq!("世界", v);
+
+
+    use std::thread;
+    use std::time::Duration;
+
+    thread::sleep(Duration::from_millis(100));
 
     test_server.stop();
 }

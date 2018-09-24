@@ -1,7 +1,7 @@
 pub mod engine;
 
 use self::engine::Engine;
-use self::engine::sample_engine::SampleEngine;
+use self::engine::sample_engine::{SampleEngine, SampleEngineBuilder};
 
 
 pub type Key = Vec<u8>;
@@ -16,8 +16,12 @@ pub struct Storage<E: Engine> {
 impl Storage<SampleEngine> {
     pub fn new() -> Self {
         Storage {
-            engine: SampleEngine::new(),
+            engine: SampleEngineBuilder::new().builder(),
             name: "Sample_Storage".to_string(),
         }
+    }
+
+    pub fn stop(&self) {
+        self.engine.shutdown();
     }
 }

@@ -16,15 +16,17 @@ const DEFAULT_WRITE_BATCH_SIZE: usize = 4;
 
 //const DEFAULT_WRITE_PENDING_SIZE: usize = usize::MAX;
 const DEFAULT_WRITE_PENDING_SIZE: usize = 1024;
-// '\n'
+// ascii 10 = \n
 const FILE_SPLIT_MARK: [u8; 1] = [10];
-// '0 /n'
+// ascii 48, 10  =  0, \n
 const FILE_PUT_MARK: [u8; 2] = [48, 10];
-// '1 /n'
+// ascii 49, 10  = 1, \n
 const FILE_DELETE_MARK: [u8; 2] = [49, 10];
+
 
 pub struct WriteQueue {
     sender: Sender<Option<Task>>,
+
 }
 
 impl WriteQueue {
@@ -39,13 +41,13 @@ impl WriteQueue {
     }
 }
 
-impl Clone for WriteQueue {
-    fn clone(&self) -> WriteQueue {
-        WriteQueue {
-            sender: self.sender.clone()
-        }
-    }
-}
+//impl Clone for WriteQueue {
+//    fn clone(&self) -> WriteQueue {
+//        WriteQueue {
+//            sender: self.sender.clone(),
+//        }
+//    }
+//}
 
 
 pub struct DataWriter {
@@ -53,6 +55,7 @@ pub struct DataWriter {
     receiver: Mutex<Option<Receiver<Option<Task>>>>,
     handle: Option<JoinHandle<()>>,
     batch_size: usize,
+    pub log_path: Option<String>,
 }
 
 impl DataWriter {
@@ -64,7 +67,12 @@ impl DataWriter {
             receiver: Mutex::new(Some(rx)),
             handle: None,
             batch_size,
+            log_path: None,
         }
+    }
+
+    pub fn record(&self, task: Option<Task>) {
+        self.queue.append(task);
     }
 
     pub fn start(&mut self) -> Result<(), io::Error> {
@@ -77,16 +85,15 @@ impl DataWriter {
 
         let batch_size = self.batch_size;
         let rx = receiver.take().unwrap();
+//        let log_path = self.log_path.as_ref().unwrap_or("temp-log.txt".to_string()).clone();
+        let log_path = self.log_path.as_ref().unwrap().to_string();
+
 
         let h = thread::Builder::new()
             .name("write thread".to_string())
-            .spawn(move || poll_to_write(rx, batch_size))?;
+            .spawn(move || poll_to_write(rx, batch_size, log_path))?;
         self.handle = Some(h);
         Ok(())
-    }
-
-    pub fn get_queue(&self) -> WriteQueue {
-        self.queue.clone()
     }
 
     pub fn stop(&self) {
@@ -94,10 +101,10 @@ impl DataWriter {
     }
 }
 
-fn poll_to_write(rx: Receiver<Option<Task>>, batch_size: usize) {
+fn poll_to_write(rx: Receiver<Option<Task>>, batch_size: usize, log_path: String) {
     let mut batch = Vec::with_capacity(batch_size);
     let mut keep_going = true;
-    let mut file = OpenOptions::new().create(true).append(true).open("foo-1.txt").unwrap();
+    let mut file = OpenOptions::new().create(true).append(true).open(log_path).unwrap();
     while keep_going {
         keep_going = fill_task_batch(&rx, &mut batch, batch_size);
         if !batch.is_empty() {
@@ -137,7 +144,7 @@ fn fill_task_batch(rx: &Receiver<Option<Task>>, buffer: &mut Vec<Task>, batch_si
                 None => return false,
             }
         }
-        None => return false,
+        None => return true,
     };
     buffer.push(head_task);
 
@@ -149,28 +156,12 @@ fn fill_task_batch(rx: &Receiver<Option<Task>>, buffer: &mut Vec<Task>, batch_si
                     None => return false,
                 }
             }
-            None => return false,
+            None => return true,
         }
     }
     true
 }
 
-#[test]
-fn data_write_test() {
-    use std::time::Duration;
-    let mut writer: DataWriter = DataWriter::new();
-
-    writer.start().ok();
-
-    let p = Task::Put(b"kk".to_vec(), b"vv".to_vec());
-    let d = Task::Delete(b"del-ket".to_vec());
-    writer.queue.append(Some(p));
-    writer.queue.append(Some(d));
-    thread::sleep(Duration::from_millis(100));
-
-//    let _ = io::stdin().read(&mut [0]).unwrap();
-    writer.stop();
-}
 
 #[test]
 fn write_batch_test() {
@@ -181,17 +172,16 @@ fn write_batch_test() {
         let mut ov: Vec<Task> = Vec::new();
         ov.push(p.clone());
         ov.push(d.clone());
-        let mut file = OpenOptions::new().write(true).open("foo.txt").unwrap();
+        let mut file = OpenOptions::new().create(true).write(true).open("foo.txt").unwrap();
         write_batch(&mut ov, &mut file);
     }
 
     let mut nv: Vec<Task> = Vec::new();
 
     {
-        let f = File::open("foo.txt").unwrap();
+        let f = OpenOptions::new().read(true).open("foo.txt").unwrap();
         let file = BufReader::new(&f);
         let mut it = file.lines();
-
 
         let mut line = it.next();
 
@@ -208,6 +198,8 @@ fn write_batch_test() {
 
             line = it.next()
         }
+        use std::fs;
+        fs::remove_file("foo.txt").ok();
     }
 
     let ov = vec![p, d];
