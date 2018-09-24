@@ -17,6 +17,7 @@ use storage::engine::sample_engine::SampleEngine;
 
 use storage::engine::Engine;
 use std::sync::Mutex;
+use std::thread::JoinHandle;
 //
 //struct MemoryDB{
 //
@@ -108,6 +109,7 @@ pub struct KvServer {
     grpc_server: GrpcServer,
     //    chan:Arc<Mutex<(Sender<()>, Receiver<()>)>>
 //    chan: (Sender<()>, Receiver<()>),
+//    handle:Option<JoinHandle<()>>,
 //
 //    rev: Option<&'a Receiver<()>>,
 //

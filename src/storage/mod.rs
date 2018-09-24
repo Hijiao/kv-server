@@ -4,7 +4,6 @@ use self::engine::Engine;
 use self::engine::sample_engine::SampleEngine;
 
 
-
 pub type Key = Vec<u8>;
 pub type Value = Vec<u8>;
 
@@ -18,7 +17,7 @@ impl Storage<SampleEngine> {
     pub fn new() -> Self {
         Storage {
             engine: SampleEngine::new(),
-            name: "Sample_Storage".to_string()
+            name: "Sample_Storage".to_string(),
         }
     }
 }
