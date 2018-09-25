@@ -39,6 +39,13 @@ const METHOD_KV_DELETE: ::grpcio::Method<super::kvpb::DeleteRequest, super::kvpb
     resp_mar: ::grpcio::Marshaller { ser: ::grpcio::pb_ser, de: ::grpcio::pb_de },
 };
 
+const METHOD_KV_FIND_NEXT: ::grpcio::Method<super::kvpb::FindNextRequest, super::kvpb::FindNextResponse> = ::grpcio::Method {
+    ty: ::grpcio::MethodType::Unary,
+    name: "/kvpb.Kv/FindNext",
+    req_mar: ::grpcio::Marshaller { ser: ::grpcio::pb_ser, de: ::grpcio::pb_de },
+    resp_mar: ::grpcio::Marshaller { ser: ::grpcio::pb_ser, de: ::grpcio::pb_de },
+};
+
 pub struct KvClient {
     client: ::grpcio::Client,
 }
@@ -97,6 +104,22 @@ impl KvClient {
     pub fn delete_async(&self, req: &super::kvpb::DeleteRequest) -> ::grpcio::Result<::grpcio::ClientUnaryReceiver<super::kvpb::DeleteResponse>> {
         self.delete_async_opt(req, ::grpcio::CallOption::default())
     }
+
+    pub fn find_next_opt(&self, req: &super::kvpb::FindNextRequest, opt: ::grpcio::CallOption) -> ::grpcio::Result<super::kvpb::FindNextResponse> {
+        self.client.unary_call(&METHOD_KV_FIND_NEXT, req, opt)
+    }
+
+    pub fn find_next(&self, req: &super::kvpb::FindNextRequest) -> ::grpcio::Result<super::kvpb::FindNextResponse> {
+        self.find_next_opt(req, ::grpcio::CallOption::default())
+    }
+
+    pub fn find_next_async_opt(&self, req: &super::kvpb::FindNextRequest, opt: ::grpcio::CallOption) -> ::grpcio::Result<::grpcio::ClientUnaryReceiver<super::kvpb::FindNextResponse>> {
+        self.client.unary_call_async(&METHOD_KV_FIND_NEXT, req, opt)
+    }
+
+    pub fn find_next_async(&self, req: &super::kvpb::FindNextRequest) -> ::grpcio::Result<::grpcio::ClientUnaryReceiver<super::kvpb::FindNextResponse>> {
+        self.find_next_async_opt(req, ::grpcio::CallOption::default())
+    }
     pub fn spawn<F>(&self, f: F) where F: ::futures::Future<Item = (), Error = ()> + Send + 'static {
         self.client.spawn(f)
     }
@@ -106,6 +129,7 @@ pub trait Kv {
     fn get(&self, ctx: ::grpcio::RpcContext, req: super::kvpb::GetRequest, sink: ::grpcio::UnarySink<super::kvpb::GetResponse>);
     fn put(&self, ctx: ::grpcio::RpcContext, req: super::kvpb::PutRequest, sink: ::grpcio::UnarySink<super::kvpb::PutResponse>);
     fn delete(&self, ctx: ::grpcio::RpcContext, req: super::kvpb::DeleteRequest, sink: ::grpcio::UnarySink<super::kvpb::DeleteResponse>);
+    fn find_next(&self, ctx: ::grpcio::RpcContext, req: super::kvpb::FindNextRequest, sink: ::grpcio::UnarySink<super::kvpb::FindNextResponse>);
 }
 
 pub fn create_kv<S: Kv + Send + Clone + 'static>(s: S) -> ::grpcio::Service {
@@ -121,6 +145,10 @@ pub fn create_kv<S: Kv + Send + Clone + 'static>(s: S) -> ::grpcio::Service {
     let instance = s.clone();
     builder = builder.add_unary_handler(&METHOD_KV_DELETE, move |ctx, req, resp| {
         instance.delete(ctx, req, resp)
+    });
+    let instance = s.clone();
+    builder = builder.add_unary_handler(&METHOD_KV_FIND_NEXT, move |ctx, req, resp| {
+        instance.find_next(ctx, req, resp)
     });
     builder.build()
 }

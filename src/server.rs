@@ -7,7 +7,7 @@ use std::sync::Arc;
 use futures::Future;
 use grpcio::{Environment, RpcContext, ServerBuilder, UnarySink, Server as GrpcServer};
 
-use kvprotos::src::kvpb::{GetRequest, GetResponse, PutRequest, PutResponse, DeleteRequest, DeleteResponse};
+use kvprotos::src::kvpb::{GetRequest, GetResponse, PutRequest, PutResponse, DeleteRequest, DeleteResponse, FindNextRequest, FindNextResponse};
 use kvprotos::src::kvpb_grpc::{self, Kv};
 use storage::Storage;
 use storage::engine::sample_engine::SampleEngine;
@@ -92,6 +92,28 @@ impl Kv for KvService {
             Ok(_) => (),
             Err(_) => response.set_error(String::from("errors")),
         }
+        let f = sink.success(response.clone())
+            .map(move |_| println!("Responded with  {{ {:?} }}", response))
+            .map_err(move |err| eprintln!("Failed to reply: {:?}", err));
+        ctx.spawn(f)
+    }
+
+    fn find_next(&self, ctx: RpcContext, req: FindNextRequest, sink: UnarySink<FindNextResponse>) {
+        let mut response = FindNextResponse::new();
+        println!("Received FindNextRequest {{ {:?} }}", req);
+        let engine = &self.storage.engine;
+        let ret = engine.find_next(req.key, req.next);
+        match ret {
+            Ok(op) => match op {
+                Some((key, value)) => {
+                    response.set_key(key);
+                    response.set_value(value)
+                }
+                None => (),
+            }
+            Err(_) => response.set_error(String::from("errors")),
+        }
+
         let f = sink.success(response.clone())
             .map(move |_| println!("Responded with  {{ {:?} }}", response))
             .map_err(move |err| eprintln!("Failed to reply: {:?}", err));

@@ -31,8 +31,20 @@ impl DataPool {
         }
     }
 
-    pub fn find(&self, k: Key) -> Range<String, String> {
-        unsafe { self.btree.range(String::from_utf8_unchecked(k)..) }
+    pub fn find_next(&self, k: Key, next: bool) -> Option<(String, String)> {
+        unsafe {
+            let mut range = self.btree.range(String::from_utf8_unchecked(k)..);
+            let wanted = if next {
+                range.next();
+                range.next()
+            } else {
+                range.next()
+            };
+            match wanted {
+                None => None,
+                Some((ref k, ref v)) => Some((k.clone().to_string(), v.clone().to_string()))
+            }
+        }
     }
 
     pub fn delete(&mut self, k: Key) {
@@ -115,10 +127,61 @@ fn data_pool_string_test() {
 //    da.insert("key_c", "value_c");
 }
 
+//
+//struct ScanIter {
+//    cur_item: Option<(String, String)>,
+//    da: DataPool,
+//}
+//
+//impl ScanIter {
+//    fn new(startKey: Key) -> ScanIter {
+//        let mut da = DataPool::new();
+//        da.insert(b"ka".to_vec(), b"va".to_vec());
+//        da.insert(b"kb".to_vec(), b"vb".to_vec());
+//        da.insert(b"kc".to_vec(), b"vc".to_vec());
+//
+//
+//        ScanIter {
+//            cur_item: Some((unsafe { &String::from_utf8_unchecked(startKey) }, &String::from(""))),
+//            da,
+//        }
+//    }
+//}
+//
+//impl Iterator for ScanIter {
+//    type Item = (&String, &String);
+//
+//    fn next(&mut self) -> Option<(String, String)> {
+//        match self.cur_item {
+//            None => None,
+//            Some((k, v)) => {
+//                let mut it = self.da.find(k.into_bytes());
+//                match it.next() {
+//                    None => {
+//                        self.cur_item = None;
+//                        None
+//                    }
+//                    Some((k, v)) => {
+//                        self.cur_item = Some((*k, *v));
+//                        Some((k, v))
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
 
 #[test]
 fn data_pool_test() {
 //    let mut da = DataPool::new();
+//    da.insert(b"".to_vec(), b"v".to_vec());
+//    da.show_all();
+//
+//    let mut iter = ScanIter::new(b"a".to_vec());
+//
+//    let n = iter.next();
+//
+//    println!("n: {:?}", n);
 
 
 //    da.insert("key_a", "value_a");
@@ -161,5 +224,17 @@ fn data_pool_test() {
 //    da.insert(&*tt, "dfvs");
 //
 //    da.show_all();
+
+//    use std::collections::BTreeMap;
+//    use std::ops::Bound::Included;
+//
+//    let mut map = BTreeMap::new();
+////    map.insert(3, "a");
+//////    map.insert(5, "b");
+//////    map.insert(8, "c");
+//    for (&key, &value) in map.range((Included(&4), Included(&8))) {
+//        println!("{}: {}", key, value);
+//    }
+//    assert_eq!(Some((&5, &"b")), map.range(4..).next());
 }
 

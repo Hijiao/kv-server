@@ -1084,19 +1084,63 @@ impl ::protobuf::reflect::ProtobufValue for DeleteResponse {
 }
 
 #[derive(PartialEq,Clone,Default)]
-pub struct ScanRequest {
+pub struct FindNextRequest {
+    // message fields
+    pub key: ::std::vec::Vec<u8>,
+    pub next: bool,
     // special fields
     unknown_fields: ::protobuf::UnknownFields,
     cached_size: ::protobuf::CachedSize,
 }
 
-impl ScanRequest {
-    pub fn new() -> ScanRequest {
+impl FindNextRequest {
+    pub fn new() -> FindNextRequest {
         ::std::default::Default::default()
+    }
+
+    // bytes key = 1;
+
+    pub fn clear_key(&mut self) {
+        self.key.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_key(&mut self, v: ::std::vec::Vec<u8>) {
+        self.key = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_key(&mut self) -> &mut ::std::vec::Vec<u8> {
+        &mut self.key
+    }
+
+    // Take field
+    pub fn take_key(&mut self) -> ::std::vec::Vec<u8> {
+        ::std::mem::replace(&mut self.key, ::std::vec::Vec::new())
+    }
+
+    pub fn get_key(&self) -> &[u8] {
+        &self.key
+    }
+
+    // bool next = 2;
+
+    pub fn clear_next(&mut self) {
+        self.next = false;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_next(&mut self, v: bool) {
+        self.next = v;
+    }
+
+    pub fn get_next(&self) -> bool {
+        self.next
     }
 }
 
-impl ::protobuf::Message for ScanRequest {
+impl ::protobuf::Message for FindNextRequest {
     fn is_initialized(&self) -> bool {
         true
     }
@@ -1105,6 +1149,16 @@ impl ::protobuf::Message for ScanRequest {
         while !is.eof()? {
             let (field_number, wire_type) = is.read_tag_unpack()?;
             match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.key)?;
+                },
+                2 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_bool()?;
+                    self.next = tmp;
+                },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
                 },
@@ -1117,12 +1171,24 @@ impl ::protobuf::Message for ScanRequest {
     #[allow(unused_variables)]
     fn compute_size(&self) -> u32 {
         let mut my_size = 0;
+        if !self.key.is_empty() {
+            my_size += ::protobuf::rt::bytes_size(1, &self.key);
+        }
+        if self.next != false {
+            my_size += 2;
+        }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
         my_size
     }
 
     fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream) -> ::protobuf::ProtobufResult<()> {
+        if !self.key.is_empty() {
+            os.write_bytes(1, &self.key)?;
+        }
+        if self.next != false {
+            os.write_bool(2, self.next)?;
+        }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
     }
@@ -1153,8 +1219,8 @@ impl ::protobuf::Message for ScanRequest {
         Self::descriptor_static()
     }
 
-    fn new() -> ScanRequest {
-        ScanRequest::new()
+    fn new() -> FindNextRequest {
+        FindNextRequest::new()
     }
 
     fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
@@ -1164,9 +1230,19 @@ impl ::protobuf::Message for ScanRequest {
         };
         unsafe {
             descriptor.get(|| {
-                let fields = ::std::vec::Vec::new();
-                ::protobuf::reflect::MessageDescriptor::new::<ScanRequest>(
-                    "ScanRequest",
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                    "key",
+                    |m: &FindNextRequest| { &m.key },
+                    |m: &mut FindNextRequest| { &mut m.key },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
+                    "next",
+                    |m: &FindNextRequest| { &m.next },
+                    |m: &mut FindNextRequest| { &mut m.next },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<FindNextRequest>(
+                    "FindNextRequest",
                     fields,
                     file_descriptor_proto()
                 )
@@ -1174,49 +1250,133 @@ impl ::protobuf::Message for ScanRequest {
         }
     }
 
-    fn default_instance() -> &'static ScanRequest {
-        static mut instance: ::protobuf::lazy::Lazy<ScanRequest> = ::protobuf::lazy::Lazy {
+    fn default_instance() -> &'static FindNextRequest {
+        static mut instance: ::protobuf::lazy::Lazy<FindNextRequest> = ::protobuf::lazy::Lazy {
             lock: ::protobuf::lazy::ONCE_INIT,
-            ptr: 0 as *const ScanRequest,
+            ptr: 0 as *const FindNextRequest,
         };
         unsafe {
-            instance.get(ScanRequest::new)
+            instance.get(FindNextRequest::new)
         }
     }
 }
 
-impl ::protobuf::Clear for ScanRequest {
+impl ::protobuf::Clear for FindNextRequest {
     fn clear(&mut self) {
+        self.clear_key();
+        self.clear_next();
         self.unknown_fields.clear();
     }
 }
 
-impl ::std::fmt::Debug for ScanRequest {
+impl ::std::fmt::Debug for FindNextRequest {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         ::protobuf::text_format::fmt(self, f)
     }
 }
 
-impl ::protobuf::reflect::ProtobufValue for ScanRequest {
+impl ::protobuf::reflect::ProtobufValue for FindNextRequest {
     fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
         ::protobuf::reflect::ProtobufValueRef::Message(self)
     }
 }
 
 #[derive(PartialEq,Clone,Default)]
-pub struct ScanResponse {
+pub struct FindNextResponse {
+    // message fields
+    pub error: ::std::string::String,
+    pub key: ::std::vec::Vec<u8>,
+    pub value: ::std::vec::Vec<u8>,
     // special fields
     unknown_fields: ::protobuf::UnknownFields,
     cached_size: ::protobuf::CachedSize,
 }
 
-impl ScanResponse {
-    pub fn new() -> ScanResponse {
+impl FindNextResponse {
+    pub fn new() -> FindNextResponse {
         ::std::default::Default::default()
+    }
+
+    // string error = 1;
+
+    pub fn clear_error(&mut self) {
+        self.error.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_error(&mut self, v: ::std::string::String) {
+        self.error = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_error(&mut self) -> &mut ::std::string::String {
+        &mut self.error
+    }
+
+    // Take field
+    pub fn take_error(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.error, ::std::string::String::new())
+    }
+
+    pub fn get_error(&self) -> &str {
+        &self.error
+    }
+
+    // bytes key = 2;
+
+    pub fn clear_key(&mut self) {
+        self.key.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_key(&mut self, v: ::std::vec::Vec<u8>) {
+        self.key = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_key(&mut self) -> &mut ::std::vec::Vec<u8> {
+        &mut self.key
+    }
+
+    // Take field
+    pub fn take_key(&mut self) -> ::std::vec::Vec<u8> {
+        ::std::mem::replace(&mut self.key, ::std::vec::Vec::new())
+    }
+
+    pub fn get_key(&self) -> &[u8] {
+        &self.key
+    }
+
+    // bytes value = 3;
+
+    pub fn clear_value(&mut self) {
+        self.value.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_value(&mut self, v: ::std::vec::Vec<u8>) {
+        self.value = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_value(&mut self) -> &mut ::std::vec::Vec<u8> {
+        &mut self.value
+    }
+
+    // Take field
+    pub fn take_value(&mut self) -> ::std::vec::Vec<u8> {
+        ::std::mem::replace(&mut self.value, ::std::vec::Vec::new())
+    }
+
+    pub fn get_value(&self) -> &[u8] {
+        &self.value
     }
 }
 
-impl ::protobuf::Message for ScanResponse {
+impl ::protobuf::Message for FindNextResponse {
     fn is_initialized(&self) -> bool {
         true
     }
@@ -1225,6 +1385,15 @@ impl ::protobuf::Message for ScanResponse {
         while !is.eof()? {
             let (field_number, wire_type) = is.read_tag_unpack()?;
             match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.error)?;
+                },
+                2 => {
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.key)?;
+                },
+                3 => {
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.value)?;
+                },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
                 },
@@ -1237,12 +1406,30 @@ impl ::protobuf::Message for ScanResponse {
     #[allow(unused_variables)]
     fn compute_size(&self) -> u32 {
         let mut my_size = 0;
+        if !self.error.is_empty() {
+            my_size += ::protobuf::rt::string_size(1, &self.error);
+        }
+        if !self.key.is_empty() {
+            my_size += ::protobuf::rt::bytes_size(2, &self.key);
+        }
+        if !self.value.is_empty() {
+            my_size += ::protobuf::rt::bytes_size(3, &self.value);
+        }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
         my_size
     }
 
     fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream) -> ::protobuf::ProtobufResult<()> {
+        if !self.error.is_empty() {
+            os.write_string(1, &self.error)?;
+        }
+        if !self.key.is_empty() {
+            os.write_bytes(2, &self.key)?;
+        }
+        if !self.value.is_empty() {
+            os.write_bytes(3, &self.value)?;
+        }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
     }
@@ -1273,8 +1460,8 @@ impl ::protobuf::Message for ScanResponse {
         Self::descriptor_static()
     }
 
-    fn new() -> ScanResponse {
-        ScanResponse::new()
+    fn new() -> FindNextResponse {
+        FindNextResponse::new()
     }
 
     fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
@@ -1284,9 +1471,24 @@ impl ::protobuf::Message for ScanResponse {
         };
         unsafe {
             descriptor.get(|| {
-                let fields = ::std::vec::Vec::new();
-                ::protobuf::reflect::MessageDescriptor::new::<ScanResponse>(
-                    "ScanResponse",
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "error",
+                    |m: &FindNextResponse| { &m.error },
+                    |m: &mut FindNextResponse| { &mut m.error },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                    "key",
+                    |m: &FindNextResponse| { &m.key },
+                    |m: &mut FindNextResponse| { &mut m.key },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                    "value",
+                    |m: &FindNextResponse| { &m.value },
+                    |m: &mut FindNextResponse| { &mut m.value },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<FindNextResponse>(
+                    "FindNextResponse",
                     fields,
                     file_descriptor_proto()
                 )
@@ -1294,48 +1496,56 @@ impl ::protobuf::Message for ScanResponse {
         }
     }
 
-    fn default_instance() -> &'static ScanResponse {
-        static mut instance: ::protobuf::lazy::Lazy<ScanResponse> = ::protobuf::lazy::Lazy {
+    fn default_instance() -> &'static FindNextResponse {
+        static mut instance: ::protobuf::lazy::Lazy<FindNextResponse> = ::protobuf::lazy::Lazy {
             lock: ::protobuf::lazy::ONCE_INIT,
-            ptr: 0 as *const ScanResponse,
+            ptr: 0 as *const FindNextResponse,
         };
         unsafe {
-            instance.get(ScanResponse::new)
+            instance.get(FindNextResponse::new)
         }
     }
 }
 
-impl ::protobuf::Clear for ScanResponse {
+impl ::protobuf::Clear for FindNextResponse {
     fn clear(&mut self) {
+        self.clear_error();
+        self.clear_key();
+        self.clear_value();
         self.unknown_fields.clear();
     }
 }
 
-impl ::std::fmt::Debug for ScanResponse {
+impl ::std::fmt::Debug for FindNextResponse {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         ::protobuf::text_format::fmt(self, f)
     }
 }
 
-impl ::protobuf::reflect::ProtobufValue for ScanResponse {
+impl ::protobuf::reflect::ProtobufValue for FindNextResponse {
     fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
         ::protobuf::reflect::ProtobufValueRef::Message(self)
     }
 }
 
 static file_descriptor_proto_data: &'static [u8] = b"\
-    \n\x10proto/kvpb.proto\x12\x04kvpb\"\x1e\n\nGetRequest\x12\x10\n\x03key\
-    \x18\x02\x20\x01(\x0cR\x03key\"9\n\x0bGetResponse\x12\x14\n\x05error\x18\
-    \x01\x20\x01(\tR\x05error\x12\x14\n\x05value\x18\x02\x20\x01(\x0cR\x05va\
-    lue\"4\n\nPutRequest\x12\x10\n\x03key\x18\x01\x20\x01(\x0cR\x03key\x12\
-    \x14\n\x05value\x18\x02\x20\x01(\x0cR\x05value\"#\n\x0bPutResponse\x12\
-    \x14\n\x05error\x18\x01\x20\x01(\tR\x05error\"!\n\rDeleteRequest\x12\x10\
-    \n\x03key\x18\x01\x20\x01(\x0cR\x03key\"&\n\x0eDeleteResponse\x12\x14\n\
-    \x05error\x18\x01\x20\x01(\tR\x05error\"\r\n\x0bScanRequest\"\x0e\n\x0cS\
-    canResponse2\x97\x01\n\x02Kv\x12,\n\x03Get\x12\x10.kvpb.GetRequest\x1a\
-    \x11.kvpb.GetResponse\"\0\x12,\n\x03Put\x12\x10.kvpb.PutRequest\x1a\x11.\
-    kvpb.PutResponse\"\0\x125\n\x06Delete\x12\x13.kvpb.DeleteRequest\x1a\x14\
-    .kvpb.DeleteResponse\"\0b\x06proto3\
+    \n\x13example/diner.proto\x12\x04kvpb\"\x1e\n\nGetRequest\x12\x10\n\x03k\
+    ey\x18\x02\x20\x01(\x0cR\x03key\"9\n\x0bGetResponse\x12\x14\n\x05error\
+    \x18\x01\x20\x01(\tR\x05error\x12\x14\n\x05value\x18\x02\x20\x01(\x0cR\
+    \x05value\"4\n\nPutRequest\x12\x10\n\x03key\x18\x01\x20\x01(\x0cR\x03key\
+    \x12\x14\n\x05value\x18\x02\x20\x01(\x0cR\x05value\"#\n\x0bPutResponse\
+    \x12\x14\n\x05error\x18\x01\x20\x01(\tR\x05error\"!\n\rDeleteRequest\x12\
+    \x10\n\x03key\x18\x01\x20\x01(\x0cR\x03key\"&\n\x0eDeleteResponse\x12\
+    \x14\n\x05error\x18\x01\x20\x01(\tR\x05error\"7\n\x0fFindNextRequest\x12\
+    \x10\n\x03key\x18\x01\x20\x01(\x0cR\x03key\x12\x12\n\x04next\x18\x02\x20\
+    \x01(\x08R\x04next\"P\n\x10FindNextResponse\x12\x14\n\x05error\x18\x01\
+    \x20\x01(\tR\x05error\x12\x10\n\x03key\x18\x02\x20\x01(\x0cR\x03key\x12\
+    \x14\n\x05value\x18\x03\x20\x01(\x0cR\x05value2\xd4\x01\n\x02Kv\x12,\n\
+    \x03Get\x12\x10.kvpb.GetRequest\x1a\x11.kvpb.GetResponse\"\0\x12,\n\x03P\
+    ut\x12\x10.kvpb.PutRequest\x1a\x11.kvpb.PutResponse\"\0\x125\n\x06Delete\
+    \x12\x13.kvpb.DeleteRequest\x1a\x14.kvpb.DeleteResponse\"\0\x12;\n\x08Fi\
+    ndNext\x12\x15.kvpb.FindNextRequest\x1a\x16.kvpb.FindNextResponse\"\0b\
+    \x06proto3\
 ";
 
 static mut file_descriptor_proto_lazy: ::protobuf::lazy::Lazy<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::lazy::Lazy {

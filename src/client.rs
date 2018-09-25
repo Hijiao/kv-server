@@ -4,11 +4,42 @@ use std::sync::Arc;
 
 use grpcio::{ChannelBuilder, EnvBuilder};
 
-use kvprotos::src::kvpb::{GetRequest, PutRequest, DeleteRequest};
+use kvprotos::src::kvpb::{GetRequest, PutRequest, DeleteRequest, FindNextRequest};
 use kvprotos::src::kvpb_grpc::KvClient;
 use storage::{Key, Value};
 use server::KvServer;
 
+struct ScanIter<'a> {
+    start_key: Key,
+    cur_key: Option<Key>,
+    client: &'a Client,
+}
+
+impl<'a> ScanIter<'a> {
+    fn new(start_key: Key, client: &'a Client) -> ScanIter {
+        ScanIter {
+            start_key: start_key,
+            cur_key: None,
+            client,
+        }
+    }
+}
+
+impl<'a> Iterator for ScanIter<'a> {
+    type Item = (Key, Value);
+
+    fn next(&mut self) -> Option<(Key, Value)> {
+        if self.cur_key.is_some() {
+            let v = self.client.find_next(self.cur_key.as_ref().unwrap().clone(), true).unwrap();
+            self.cur_key = Some(v.0.clone());
+            Some(v)
+        } else {
+            let v = self.client.find_next(self.start_key.clone(), false).unwrap();
+            self.cur_key = Some(v.0.clone());
+            Some(v)
+        }
+    }
+}
 
 struct Client {
     client: KvClient,
@@ -30,6 +61,21 @@ impl Client {
         request.set_key(k);
         let ret = self.client.get(&request).expect("RPC failed");
         unsafe { String::from_utf8_unchecked(ret.value) }
+    }
+
+    pub fn find(&self, k: Key) -> ScanIter {
+        ScanIter::new(k, &self)
+    }
+
+    fn find_next(&self, k: Key, next: bool) -> Option<(Key, Value)> {
+        let mut request = FindNextRequest::new();
+        request.set_key(k);
+        request.set_next(next);
+        let ret = self.client.find_next(&request).expect("RPC failed");
+        unsafe {
+//            Some((String::from_utf8_unchecked(ret.key), (String::from_utf8_unchecked(ret.value))))
+            Some((ret.key, ret.value))
+        }
     }
 
     pub fn put(&self, k: Key, v: Value) {
@@ -78,6 +124,14 @@ fn client_test() {
     let v = client.get(test_key.clone());
     assert_eq!("世界", v);
 
+    client.put(b"ka".to_vec(), b"va".to_vec());
+    client.put(b"kb".to_vec(), b"vb".to_vec());
+
+    let mut iter = client.find(b"".to_vec());
+    assert_eq!(Some((b"ka".to_vec(), b"va".to_vec())), iter.next());
+    assert_eq!(Some((b"kb".to_vec(), b"vb".to_vec())), iter.next());
+
+    assert_eq!(Some(("你好".to_string().into_bytes(), "世界".to_string().into_bytes())), iter.next());
 
     use std::thread;
     use std::time::Duration;

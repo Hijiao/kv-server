@@ -77,6 +77,7 @@ impl SampleEngine {
     }
 
     pub fn recovery_from_file(&self) {
+        println!("engine recovering...");
         let f = OpenOptions::new().read(true).open(self.get_log_path());
         match f {
             Err(_) => println!("recovery log not exist!"),
@@ -132,6 +133,13 @@ impl Engine for SampleEngine {
         data_pool.delete(key);
         Ok(())
     }
+    fn find_next(&self, key: Key, next: bool) -> Result<Option<(Key, Value)>> {
+        let ret = self.data_pool.read().unwrap().find_next(key, next);
+        match ret {
+            Some((k, v)) => Ok(Some((k.clone().into_bytes(), v.clone().into_bytes()))),
+            None => Ok(None)
+        }
+    }
 }
 
 #[test]
@@ -154,7 +162,25 @@ fn engine_test() {
     let ret = engine.get(k.clone());
 
     assert_eq!(Some(None), ret.ok());
-    thread::sleep(Duration::from_millis(100));
+
+    engine.shutdown();
+}
+
+
+#[test]
+fn engine_scan_test() {
+    use std::thread;
+    use std::time::Duration;
+
+    let engine = SampleEngineBuilder::new().auto_recovery(false).builder();
+    engine.put(b"ka".to_vec(), b"va".to_vec());
+    engine.put(b"kb".to_vec(), b"vb".to_vec());
+
+    let v = engine.find_next(b"a".to_vec(), false).ok().unwrap().unwrap();
+    assert_eq!((b"ka".to_vec(), b"va".to_vec()), v);
+
+    let v = engine.find_next(b"a".to_vec(), true).ok().unwrap().unwrap();
+    assert_eq!((b"kb".to_vec(), b"vb".to_vec()), v);
 
     engine.shutdown();
 }
