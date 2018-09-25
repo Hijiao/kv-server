@@ -7,7 +7,6 @@ use grpcio::{ChannelBuilder, EnvBuilder};
 use kvprotos::src::kvpb::{GetRequest, PutRequest, DeleteRequest, FindNextRequest};
 use kvprotos::src::kvpb_grpc::KvClient;
 use storage::{Key, Value};
-use server::KvServer;
 
 struct ScanIter<'a> {
     start_key: Key,
@@ -72,10 +71,7 @@ impl Client {
         request.set_key(k);
         request.set_next(next);
         let ret = self.client.find_next(&request).expect("RPC failed");
-        unsafe {
-//            Some((String::from_utf8_unchecked(ret.key), (String::from_utf8_unchecked(ret.value))))
-            Some((ret.key, ret.value))
-        }
+        Some((ret.key, ret.value))
     }
 
     pub fn put(&self, k: Key, v: Value) {
@@ -95,6 +91,8 @@ impl Client {
 
 #[test]
 fn client_test() {
+    use server::KvServer;
+
     let test_key = b"key-test".to_vec();
     let test_value = b"value-test".to_vec();
 

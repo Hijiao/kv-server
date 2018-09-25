@@ -144,8 +144,6 @@ impl Engine for SampleEngine {
 
 #[test]
 fn engine_test() {
-    use std::thread;
-    use std::time::Duration;
 
     let engine = SampleEngineBuilder::new().auto_recovery(false).builder();
     let k = b"k".to_vec();
@@ -169,12 +167,10 @@ fn engine_test() {
 
 #[test]
 fn engine_scan_test() {
-    use std::thread;
-    use std::time::Duration;
 
     let engine = SampleEngineBuilder::new().auto_recovery(false).builder();
-    engine.put(b"ka".to_vec(), b"va".to_vec());
-    engine.put(b"kb".to_vec(), b"vb".to_vec());
+    engine.put(b"ka".to_vec(), b"va".to_vec()).ok();
+    engine.put(b"kb".to_vec(), b"vb".to_vec()).ok();
 
     let v = engine.find_next(b"a".to_vec(), false).ok().unwrap().unwrap();
     assert_eq!((b"ka".to_vec(), b"va".to_vec()), v);
@@ -200,13 +196,6 @@ fn auto_recovery_off_test() {
     let engine = SampleEngineBuilder::new().set_log_path("tests/files/foo-test.txt").auto_recovery(false).builder();
 
     let k = b"k123".to_vec();
-    let v = b"v234".to_vec();
     let actual_v = engine.get(k.clone()).ok().unwrap();
     assert_eq!(None, actual_v)
-}
-
-#[test]
-fn t() {
-    let z = "你好";
-    let v = z.to_string().into_bytes();
 }
