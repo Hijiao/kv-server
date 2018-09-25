@@ -10,7 +10,7 @@ service Kv {
     }
     rpc Delete (DeleteRequest) returns (DeleteResponse) {
     }
-    rpc Scan (FindNextRequest) returns (FindNextResponse) {
+    rpc FindNext (FindNextRequest) returns (FindNextResponse) {
     }
 }
 
@@ -21,6 +21,7 @@ message GetRequest {
 message GetResponse {
     string error = 1;
     bytes value = 2;
+    bool empty = 3;
 }
 
 message PutRequest {
@@ -48,4 +49,5 @@ message FindNextResponse {
     string error = 1;
     bytes key = 2;
     bytes value = 3;
+    bool empty = 4;
 }

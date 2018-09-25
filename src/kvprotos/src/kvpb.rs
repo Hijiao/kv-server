@@ -189,6 +189,7 @@ pub struct GetResponse {
     // message fields
     pub error: ::std::string::String,
     pub value: ::std::vec::Vec<u8>,
+    pub empty: bool,
     // special fields
     unknown_fields: ::protobuf::UnknownFields,
     cached_size: ::protobuf::CachedSize,
@@ -250,6 +251,21 @@ impl GetResponse {
     pub fn get_value(&self) -> &[u8] {
         &self.value
     }
+
+    // bool empty = 3;
+
+    pub fn clear_empty(&mut self) {
+        self.empty = false;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_empty(&mut self, v: bool) {
+        self.empty = v;
+    }
+
+    pub fn get_empty(&self) -> bool {
+        self.empty
+    }
 }
 
 impl ::protobuf::Message for GetResponse {
@@ -266,6 +282,13 @@ impl ::protobuf::Message for GetResponse {
                 },
                 2 => {
                     ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.value)?;
+                },
+                3 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_bool()?;
+                    self.empty = tmp;
                 },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
@@ -285,6 +308,9 @@ impl ::protobuf::Message for GetResponse {
         if !self.value.is_empty() {
             my_size += ::protobuf::rt::bytes_size(2, &self.value);
         }
+        if self.empty != false {
+            my_size += 2;
+        }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
         my_size
@@ -296,6 +322,9 @@ impl ::protobuf::Message for GetResponse {
         }
         if !self.value.is_empty() {
             os.write_bytes(2, &self.value)?;
+        }
+        if self.empty != false {
+            os.write_bool(3, self.empty)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -349,6 +378,11 @@ impl ::protobuf::Message for GetResponse {
                     |m: &GetResponse| { &m.value },
                     |m: &mut GetResponse| { &mut m.value },
                 ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
+                    "empty",
+                    |m: &GetResponse| { &m.empty },
+                    |m: &mut GetResponse| { &mut m.empty },
+                ));
                 ::protobuf::reflect::MessageDescriptor::new::<GetResponse>(
                     "GetResponse",
                     fields,
@@ -373,6 +407,7 @@ impl ::protobuf::Clear for GetResponse {
     fn clear(&mut self) {
         self.clear_error();
         self.clear_value();
+        self.clear_empty();
         self.unknown_fields.clear();
     }
 }
@@ -1287,6 +1322,7 @@ pub struct FindNextResponse {
     pub error: ::std::string::String,
     pub key: ::std::vec::Vec<u8>,
     pub value: ::std::vec::Vec<u8>,
+    pub empty: bool,
     // special fields
     unknown_fields: ::protobuf::UnknownFields,
     cached_size: ::protobuf::CachedSize,
@@ -1374,6 +1410,21 @@ impl FindNextResponse {
     pub fn get_value(&self) -> &[u8] {
         &self.value
     }
+
+    // bool empty = 4;
+
+    pub fn clear_empty(&mut self) {
+        self.empty = false;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_empty(&mut self, v: bool) {
+        self.empty = v;
+    }
+
+    pub fn get_empty(&self) -> bool {
+        self.empty
+    }
 }
 
 impl ::protobuf::Message for FindNextResponse {
@@ -1393,6 +1444,13 @@ impl ::protobuf::Message for FindNextResponse {
                 },
                 3 => {
                     ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.value)?;
+                },
+                4 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_bool()?;
+                    self.empty = tmp;
                 },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
@@ -1415,6 +1473,9 @@ impl ::protobuf::Message for FindNextResponse {
         if !self.value.is_empty() {
             my_size += ::protobuf::rt::bytes_size(3, &self.value);
         }
+        if self.empty != false {
+            my_size += 2;
+        }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
         my_size
@@ -1429,6 +1490,9 @@ impl ::protobuf::Message for FindNextResponse {
         }
         if !self.value.is_empty() {
             os.write_bytes(3, &self.value)?;
+        }
+        if self.empty != false {
+            os.write_bool(4, self.empty)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -1487,6 +1551,11 @@ impl ::protobuf::Message for FindNextResponse {
                     |m: &FindNextResponse| { &m.value },
                     |m: &mut FindNextResponse| { &mut m.value },
                 ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
+                    "empty",
+                    |m: &FindNextResponse| { &m.empty },
+                    |m: &mut FindNextResponse| { &mut m.empty },
+                ));
                 ::protobuf::reflect::MessageDescriptor::new::<FindNextResponse>(
                     "FindNextResponse",
                     fields,
@@ -1512,6 +1581,7 @@ impl ::protobuf::Clear for FindNextResponse {
         self.clear_error();
         self.clear_key();
         self.clear_value();
+        self.clear_empty();
         self.unknown_fields.clear();
     }
 }
@@ -1529,23 +1599,24 @@ impl ::protobuf::reflect::ProtobufValue for FindNextResponse {
 }
 
 static file_descriptor_proto_data: &'static [u8] = b"\
-    \n\x13example/diner.proto\x12\x04kvpb\"\x1e\n\nGetRequest\x12\x10\n\x03k\
-    ey\x18\x02\x20\x01(\x0cR\x03key\"9\n\x0bGetResponse\x12\x14\n\x05error\
+    \n\x12example/kvpb.proto\x12\x04kvpb\"\x1e\n\nGetRequest\x12\x10\n\x03ke\
+    y\x18\x02\x20\x01(\x0cR\x03key\"O\n\x0bGetResponse\x12\x14\n\x05error\
     \x18\x01\x20\x01(\tR\x05error\x12\x14\n\x05value\x18\x02\x20\x01(\x0cR\
-    \x05value\"4\n\nPutRequest\x12\x10\n\x03key\x18\x01\x20\x01(\x0cR\x03key\
-    \x12\x14\n\x05value\x18\x02\x20\x01(\x0cR\x05value\"#\n\x0bPutResponse\
-    \x12\x14\n\x05error\x18\x01\x20\x01(\tR\x05error\"!\n\rDeleteRequest\x12\
-    \x10\n\x03key\x18\x01\x20\x01(\x0cR\x03key\"&\n\x0eDeleteResponse\x12\
-    \x14\n\x05error\x18\x01\x20\x01(\tR\x05error\"7\n\x0fFindNextRequest\x12\
-    \x10\n\x03key\x18\x01\x20\x01(\x0cR\x03key\x12\x12\n\x04next\x18\x02\x20\
-    \x01(\x08R\x04next\"P\n\x10FindNextResponse\x12\x14\n\x05error\x18\x01\
-    \x20\x01(\tR\x05error\x12\x10\n\x03key\x18\x02\x20\x01(\x0cR\x03key\x12\
-    \x14\n\x05value\x18\x03\x20\x01(\x0cR\x05value2\xd4\x01\n\x02Kv\x12,\n\
-    \x03Get\x12\x10.kvpb.GetRequest\x1a\x11.kvpb.GetResponse\"\0\x12,\n\x03P\
-    ut\x12\x10.kvpb.PutRequest\x1a\x11.kvpb.PutResponse\"\0\x125\n\x06Delete\
-    \x12\x13.kvpb.DeleteRequest\x1a\x14.kvpb.DeleteResponse\"\0\x12;\n\x08Fi\
-    ndNext\x12\x15.kvpb.FindNextRequest\x1a\x16.kvpb.FindNextResponse\"\0b\
-    \x06proto3\
+    \x05value\x12\x14\n\x05empty\x18\x03\x20\x01(\x08R\x05empty\"4\n\nPutReq\
+    uest\x12\x10\n\x03key\x18\x01\x20\x01(\x0cR\x03key\x12\x14\n\x05value\
+    \x18\x02\x20\x01(\x0cR\x05value\"#\n\x0bPutResponse\x12\x14\n\x05error\
+    \x18\x01\x20\x01(\tR\x05error\"!\n\rDeleteRequest\x12\x10\n\x03key\x18\
+    \x01\x20\x01(\x0cR\x03key\"&\n\x0eDeleteResponse\x12\x14\n\x05error\x18\
+    \x01\x20\x01(\tR\x05error\"7\n\x0fFindNextRequest\x12\x10\n\x03key\x18\
+    \x01\x20\x01(\x0cR\x03key\x12\x12\n\x04next\x18\x02\x20\x01(\x08R\x04nex\
+    t\"f\n\x10FindNextResponse\x12\x14\n\x05error\x18\x01\x20\x01(\tR\x05err\
+    or\x12\x10\n\x03key\x18\x02\x20\x01(\x0cR\x03key\x12\x14\n\x05value\x18\
+    \x03\x20\x01(\x0cR\x05value\x12\x14\n\x05empty\x18\x04\x20\x01(\x08R\x05\
+    empty2\xd4\x01\n\x02Kv\x12,\n\x03Get\x12\x10.kvpb.GetRequest\x1a\x11.kvp\
+    b.GetResponse\"\0\x12,\n\x03Put\x12\x10.kvpb.PutRequest\x1a\x11.kvpb.Put\
+    Response\"\0\x125\n\x06Delete\x12\x13.kvpb.DeleteRequest\x1a\x14.kvpb.De\
+    leteResponse\"\0\x12;\n\x08FindNext\x12\x15.kvpb.FindNextRequest\x1a\x16\
+    .kvpb.FindNextResponse\"\0b\x06proto3\
 ";
 
 static mut file_descriptor_proto_lazy: ::protobuf::lazy::Lazy<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::lazy::Lazy {

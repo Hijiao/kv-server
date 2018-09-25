@@ -12,14 +12,16 @@ struct ScanIter<'a> {
     start_key: Key,
     cur_key: Option<Key>,
     client: &'a Client,
+    has_next: bool,
 }
 
 impl<'a> ScanIter<'a> {
     fn new(start_key: Key, client: &'a Client) -> ScanIter {
         ScanIter {
-            start_key: start_key,
+            start_key,
             cur_key: None,
             client,
+            has_next: true,
         }
     }
 }
@@ -28,14 +30,34 @@ impl<'a> Iterator for ScanIter<'a> {
     type Item = (Key, Value);
 
     fn next(&mut self) -> Option<(Key, Value)> {
+        if !self.has_next {
+            return None;
+        }
+
         if self.cur_key.is_some() {
-            let v = self.client.find_next(self.cur_key.as_ref().unwrap().clone(), true).unwrap();
-            self.cur_key = Some(v.0.clone());
-            Some(v)
+            let ret = self.client.find_next(self.cur_key.as_ref().unwrap().clone(), true);
+            match ret {
+                Some(v) => {
+                    self.cur_key = Some(v.0.clone());
+                    return Some(v);
+                }
+                None => {
+                    self.has_next = false;
+                    return None;
+                }
+            }
         } else {
-            let v = self.client.find_next(self.start_key.clone(), false).unwrap();
-            self.cur_key = Some(v.0.clone());
-            Some(v)
+            let ret = self.client.find_next(self.start_key.clone(), false);
+            match ret {
+                Some(v) => {
+                    self.cur_key = Some(v.0.clone());
+                    return Some(v);
+                }
+                None => {
+                    self.has_next = false;
+                    return None;
+                }
+            }
         }
     }
 }
@@ -55,11 +77,16 @@ impl Client {
             client: kv_client,
         }
     }
-    pub fn get(&self, k: Key) -> String {
+    pub fn get(&self, k: Key) -> Option<String> {
         let mut request = GetRequest::new();
         request.set_key(k);
         let ret = self.client.get(&request).expect("RPC failed");
-        unsafe { String::from_utf8_unchecked(ret.value) }
+        if ret.empty {
+            return None;
+        }
+        unsafe {
+            Some(String::from_utf8_unchecked(ret.value))
+        }
     }
 
     pub fn find(&self, k: Key) -> ScanIter {
@@ -71,6 +98,9 @@ impl Client {
         request.set_key(k);
         request.set_next(next);
         let ret = self.client.find_next(&request).expect("RPC failed");
+        if ret.empty {
+            return None;
+        }
         Some((ret.key, ret.value))
     }
 
@@ -106,21 +136,21 @@ fn client_test() {
     client.delete(test_key.clone());
 
     let v = client.get(test_key.clone());
-    assert_eq!("", v);
+    assert_eq!(None, v);
 
     client.put(test_key.clone(), test_value.clone());
     let v = client.get(test_key.clone());
-    assert_eq!(String::from_utf8(test_value.clone()).unwrap(), v);
+    assert_eq!(Some(String::from_utf8(test_value.clone()).unwrap()), v);
 
     client.delete(test_key.clone());
     let v = client.get(test_key.clone());
-    assert_eq!("", v);
+    assert_eq!(None, v);
 
     let test_key = "你好".to_string().into_bytes();
     let test_value = "世界".to_string().into_bytes();
     client.put(test_key.clone(), test_value.clone());
     let v = client.get(test_key.clone());
-    assert_eq!("世界", v);
+    assert_eq!(Some("世界".to_string()), v);
 
     client.put(b"ka".to_vec(), b"va".to_vec());
     client.put(b"kb".to_vec(), b"vb".to_vec());
@@ -130,6 +160,9 @@ fn client_test() {
     assert_eq!(Some((b"kb".to_vec(), b"vb".to_vec())), iter.next());
 
     assert_eq!(Some(("你好".to_string().into_bytes(), "世界".to_string().into_bytes())), iter.next());
+
+    assert_eq!(None, iter.next());
+    assert_eq!(None, iter.next());
 
     use std::thread;
     use std::time::Duration;

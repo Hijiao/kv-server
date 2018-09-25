@@ -54,8 +54,11 @@ impl Kv for KvService {
         let ret = engine.get(req.key);
         match ret {
             Ok(op) => match op {
-                Some(key) => response.set_value(key),
-                None => (),
+                Some(value) => {
+                    response.set_value(value);
+                    response.set_empty(false)
+                }
+                None => response.set_empty(true),
             }
             Err(_) => response.set_error(String::from("errors")),
         }
@@ -107,9 +110,10 @@ impl Kv for KvService {
             Ok(op) => match op {
                 Some((key, value)) => {
                     response.set_key(key);
-                    response.set_value(value)
+                    response.set_value(value);
+                    response.set_empty(false);
                 }
-                None => (),
+                None => response.set_empty(true),
             }
             Err(_) => response.set_error(String::from("errors")),
         }
