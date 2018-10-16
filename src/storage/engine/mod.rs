@@ -30,7 +30,6 @@ impl Display for Task {
 }
 
 pub trait Engine {
-    //    fn get(&self,key:Key)->Result<Option<Value>>;
     fn get(&self, key: Key) -> Result<Option<Value>>;
     fn put(&self, key: Key, value: Value) -> Result<()>;
     fn delete(&self, key: Key) -> Result<()>;

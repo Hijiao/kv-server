@@ -16,7 +16,7 @@ pub struct Storage<E: Engine> {
 impl Storage<SampleEngine> {
     pub fn new() -> Self {
         Storage {
-            engine: SampleEngineBuilder::new().builder(),
+            engine: SampleEngineBuilder::new().build(),
             name: "Sample_Storage".to_string(),
         }
     }

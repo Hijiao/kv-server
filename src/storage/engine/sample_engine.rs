@@ -31,7 +31,7 @@ impl SampleEngineBuilder {
         self.log_path = Some(log_path.to_string());
         self
     }
-    pub fn builder(self) -> SampleEngine {
+    pub fn build(self) -> SampleEngine {
         let log_path = match self.log_path {
             None => DEFAULT_LOG_PATH.to_string(),
             Some(path) => path,
@@ -144,8 +144,7 @@ impl Engine for SampleEngine {
 
 #[test]
 fn engine_test() {
-
-    let engine = SampleEngineBuilder::new().auto_recovery(false).builder();
+    let engine = SampleEngineBuilder::new().auto_recovery(false).build();
     let k = b"k".to_vec();
     let v = b"v".to_vec();
 
@@ -167,8 +166,7 @@ fn engine_test() {
 
 #[test]
 fn engine_scan_test() {
-
-    let engine = SampleEngineBuilder::new().auto_recovery(false).builder();
+    let engine = SampleEngineBuilder::new().auto_recovery(false).build();
     engine.put(b"ka".to_vec(), b"va".to_vec()).ok();
     engine.put(b"kb".to_vec(), b"vb".to_vec()).ok();
 
@@ -183,7 +181,7 @@ fn engine_scan_test() {
 
 #[test]
 fn auto_recovery_on_test() {
-    let engine = SampleEngineBuilder::new().set_log_path("tests/files/foo-test.txt").auto_recovery(true).builder();
+    let engine = SampleEngineBuilder::new().set_log_path("tests/files/foo-test.txt").auto_recovery(true).build();
 
     let k = b"k123".to_vec();
     let v = b"v234".to_vec();
@@ -193,7 +191,7 @@ fn auto_recovery_on_test() {
 
 #[test]
 fn auto_recovery_off_test() {
-    let engine = SampleEngineBuilder::new().set_log_path("tests/files/foo-test.txt").auto_recovery(false).builder();
+    let engine = SampleEngineBuilder::new().set_log_path("tests/files/foo-test.txt").auto_recovery(false).build();
 
     let k = b"k123".to_vec();
     let actual_v = engine.get(k.clone()).ok().unwrap();
